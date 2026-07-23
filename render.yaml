@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: stratum
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_PUBLIC_URL
+        sync: false
+      - key: APP_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: NVIDIA_NIM_API_KEY
+        sync: false
+      - key: NVIDIA_NIM_BASE_URL
+        value: https://integrate.api.nvidia.com/v1
+      - key: NVIDIA_NIM_FAST_MODEL
+        value: nvidia/nemotron-3-nano-30b-a3b
+      - key: NVIDIA_NIM_REASONING_MODEL
+        value: nvidia/nemotron-3-super-120b-a12b
+      - key: NVIDIA_NIM_CHALLENGER_MODEL
+        value: google/gemma-4-31b-it
+      - key: NVIDIA_NIM_TIMEOUT_MS
+        value: "180000"
+      - key: AI_PROMPT_VERSION
+        value: policy-v3
+      - key: AI_ESCALATION_THRESHOLD
+        value: "0.78"
+      - key: AI_CHUNK_CHARACTERS
+        value: "80000"
+      - key: AI_CHUNK_CONCURRENCY
+        value: "2"
+      - key: POLICY_WORKER_POLL_MS
+        value: "3000"
+      - key: TRANSLATION_PROVIDER
+        value: nvidia
+      - key: TRANSLATION_TIMEOUT_MS
+        value: "30000"

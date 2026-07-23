@@ -1,14 +1,14 @@
+import { LockKeyhole } from "lucide-react";
 import { useI18n } from "../i18n/context";
 import "./Dashboard.css";
 
-function Dashboard({ user, authLoading, onLoginClick }) {
+function Dashboard({ user, onLoginClick }) {
   const { t } = useI18n();
-  if (authLoading) return <div className="dashboard"><h1 className="dashboard-title">{t("Dashboard")}</h1><div className="dashboard-signed-out-card"><h2 className="dashboard-signed-out-title">{t("Restoring your session…")}</h2></div></div>;
   if (!user) return (
     <div className="dashboard">
       <h1 className="dashboard-title">{t("Dashboard")}</h1>
       <div className="dashboard-signed-out-card">
-        <div className="dashboard-signed-out-icon">🔒</div>
+        <div className="dashboard-signed-out-icon"><LockKeyhole size={22} strokeWidth={1.8} aria-hidden="true" /></div>
         <h2 className="dashboard-signed-out-title">{t("Not signed in yet")}</h2>
         <p className="dashboard-signed-out-description">{t("Log in or create an account to see your documents, scanned policies, and account details here.")}</p>
         <button className="dashboard-signed-out-button" onClick={onLoginClick}>{t("Log in / Sign up")}</button>
@@ -32,4 +32,5 @@ function Dashboard({ user, authLoading, onLoginClick }) {
     </div>
   );
 }
+
 export default Dashboard;

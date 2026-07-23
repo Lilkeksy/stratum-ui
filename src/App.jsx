@@ -11,8 +11,10 @@ import SettingsScreen from "./components/SettingsScreen";
 import UploadModal from "./components/UploadModal";
 import HelpScreen from "./components/HelpScreen";
 import DemoScreen from "./components/DemoScreen";
+import SessionBoot from "./components/SessionBoot";
 import { authApi, preferencesApi } from "./lib/api";
 import { useI18n } from "./i18n/context";
+import "./App.css";
 
 function getEmailLinkPayload() {
   const query = new URLSearchParams(window.location.search);
@@ -31,7 +33,7 @@ function getEmailLinkPayload() {
 
 function App() {
   const { setLanguage, t } = useI18n();
-  const [currentView, setCurrentView] = useState("home");
+  const [currentView, setCurrentView] = useState("demo");
   const [showOverlay, setShowOverlay] = useState(false);
   const [overlayPos, setOverlayPos] = useState({ x: 0, y: 0 });
   const [cardStatus, setCardStatus] = useState(null);
@@ -74,6 +76,7 @@ function App() {
             return;
           }
           setUser(data.user);
+          setCurrentView("home");
           if (link.action === "recovery") setAuthView("reset");
           return;
         }
@@ -88,13 +91,20 @@ function App() {
             setMfaState(mfa);
           } else {
             setUser(data.user);
+            setCurrentView(data.user ? "home" : "demo");
           }
         }
       } catch (error) {
         if (!active) return;
         setUser(null);
-        setAuthEntryError(error.message || "This email link is invalid or has expired.");
-        setAuthView("login");
+        setCurrentView("demo");
+        const isEmailEntry = Boolean(link.accessToken || link.refreshToken || link.action || link.error);
+        if (isEmailEntry) {
+          setAuthEntryError(error.message || "This email link is invalid or has expired.");
+          setAuthView("login");
+        } else {
+          console.warn("Unable to restore the session; continuing in guest mode:", error.message);
+        }
       } finally {
         if (active) setAuthLoading(false);
       }
@@ -156,6 +166,7 @@ function App() {
   const handleOnboardingFinish = () => {
     localStorage.setItem("stratum_onboarding_seen", "true");
     setShowOnboarding(false);
+    setCurrentView("demo");
   };
 
   const handleSummarizeClick = () => {
@@ -190,6 +201,7 @@ function App() {
       } else {
         setUser(data.user);
         setAuthView(null);
+        setCurrentView("home");
       }
       return data;
     }
@@ -205,6 +217,7 @@ function App() {
     } else if (data.authenticated) {
       setUser(data.user);
       setAuthView(null);
+      setCurrentView("home");
     }
     return data;
   };
@@ -214,6 +227,7 @@ function App() {
     setUser(data.user);
     setMfaState(null);
     setAuthView(null);
+    setCurrentView("home");
     return data;
   };
 
@@ -223,6 +237,7 @@ function App() {
     } finally {
       setMfaState(null);
       setUser(null);
+      setCurrentView("demo");
     }
   };
 
@@ -232,9 +247,13 @@ function App() {
     } finally {
       setUser(null);
       setMfaState(null);
-      setCurrentView("home");
+      setCurrentView("demo");
     }
   };
+
+  if (authLoading && !authView && !mfaState) {
+    return <SessionBoot />;
+  }
 
   if (mfaState) {
     return <MfaPage mfa={mfaState} onVerify={handleMfaVerify} onCancel={cancelMfa} />;
@@ -267,14 +286,14 @@ function App() {
         />
       )}
 
-      <div style={{ display: "flex" }}>
+      <div className="app-shell">
         <Sidebar
           currentView={currentView}
           onNavigate={setCurrentView}
           onUploadClick={handleUploadClick}
         />
 
-        <div style={{ flex: 1 }}>
+        <div className="app-main">
           {currentView !== "home" && (
             <TopBar
               eyebrow={
@@ -297,7 +316,6 @@ function App() {
           {currentView === "home" && (
             <Dashboard
               user={user}
-              authLoading={authLoading}
               onLoginClick={() => openAuth("login")}
             />
           )}

@@ -8,8 +8,14 @@
 }
 
 .dashboard-signed-out-icon {
-  font-size: 2rem;
-  margin-bottom: var(--space-sm);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto var(--space-sm);
+  border-radius: 12px;
+  background: rgba(0, 115, 223, 0.08);
+  color: var(--color-primary);
 }
 
 .dashboard-signed-out-title {

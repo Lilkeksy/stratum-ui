@@ -1,93 +1,213 @@
 .onboarding-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 36, 59, 0.72);
+  z-index: 2100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(28, 39, 53, 0.42);
+  backdrop-filter: blur(10px);
+  animation: onboarding-fade 180ms ease-out;
+}
+
+.onboarding-card {
+  width: min(760px, 100%);
+  overflow: hidden;
+  border: 1px solid rgba(192, 198, 214, 0.75);
+  border-radius: 20px;
+  background: var(--color-white);
+  box-shadow: 0 28px 80px rgba(22, 35, 63, 0.2);
+  animation: onboarding-rise 220ms ease-out;
+}
+
+.onboarding-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  animation: fadeIn 0.2s ease;
-}
-.onboarding-card {
-  position: relative;
-  width: 340px;
-  background: var(--color-white);
-  border-radius: var(--radius-md);
-  padding: var(--space-xl) var(--space-lg) var(--space-lg);
-  text-align: center;
-  box-shadow: var(--shadow-card);
-  animation: slideUp 0.25s ease;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.onboarding-skip {
-  position: absolute;
-  top: var(--space-sm);
-  right: var(--space-sm);
-  background: none;
-  border: none;
+.onboarding-counter {
   color: var(--color-mute);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
+
+.onboarding-layout {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 356px;
+}
+
+.onboarding-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-right: 1px solid var(--color-border);
+  background: #f3f4f5;
+}
+
+.onboarding-icon-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 164px;
+  height: 164px;
+  border: 1px solid #c0c6d6;
+  border-radius: 50%;
+}
+
+.onboarding-icon-ring::before,
+.onboarding-icon-ring::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(0, 91, 179, 0.18);
+  border-radius: 50%;
+}
+
+.onboarding-icon-ring::before { width: 124px; height: 124px; }
+.onboarding-icon-ring::after { width: 202px; height: 202px; }
 
 .onboarding-icon {
-  font-size: 2.5rem;
-  margin-bottom: var(--space-md);
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  background: #005bb3;
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(0, 91, 179, 0.2);
+}
+
+.onboarding-visual-line {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 44px;
+  height: 4px;
+  border-radius: 99px;
+  background: #7cf5cc;
+}
+
+.onboarding-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 42px 44px 38px;
+  text-align: left;
+}
+
+.onboarding-kicker {
+  margin-bottom: 12px;
+  color: #007056;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
 }
 
 .onboarding-title {
-  font-size: var(--font-size-lg);
+  max-width: 390px;
+  margin: 0 0 14px;
   color: var(--color-dark);
-  margin: 0 0 var(--space-sm) 0;
+  font-size: clamp(1.7rem, 3vw, 2.15rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
 }
 
 .onboarding-description {
-  font-size: var(--font-size-base);
+  max-width: 410px;
+  min-height: 72px;
+  margin: 0;
   color: var(--color-mute);
-  line-height: 1.5;
-  margin: 0 0 var(--space-lg) 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
 }
 
 .onboarding-dots {
   display: flex;
-  justify-content: center;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-lg);
+  gap: 7px;
+  margin: 26px 0;
 }
 
 .onboarding-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-card);
+  width: 20px;
+  height: 3px;
+  border-radius: 99px;
+  background: #dfe3e8;
+  transition: width 180ms ease, background 180ms ease;
 }
 
 .onboarding-dot.active {
-  background: var(--color-primary);
+  width: 38px;
+  background: #005bb3;
 }
 
+.onboarding-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.onboarding-skip,
 .onboarding-next {
-  width: 100%;
-  background: var(--color-primary);
-  color: var(--color-white);
-  border: none;
-  padding: var(--space-sm);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
-  font-weight: 600;
+  min-height: 42px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 650;
   cursor: pointer;
 }
 
-.onboarding-next:hover {
-  background: var(--color-dark);
+.onboarding-skip {
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--color-mute);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.onboarding-skip:hover { color: var(--color-dark); }
+
+.onboarding-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-width: 138px;
+  padding: 0 18px;
+  border: 1px solid #005bb3;
+  background: #005bb3;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(0, 91, 179, 0.16);
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+.onboarding-next:hover { background: #004a92; border-color: #004a92; }
+
+@media (max-width: 660px) {
+  .onboarding-overlay { padding: 14px; }
+  .onboarding-header { min-height: 64px; padding: 0 20px; }
+  .onboarding-layout { grid-template-columns: 1fr; }
+  .onboarding-visual { min-height: 172px; border-right: 0; border-bottom: 1px solid var(--color-border); }
+  .onboarding-icon-ring { width: 116px; height: 116px; }
+  .onboarding-icon-ring::before { width: 92px; height: 92px; }
+  .onboarding-icon-ring::after { width: 146px; height: 146px; }
+  .onboarding-icon { width: 68px; height: 68px; border-radius: 18px; }
+  .onboarding-icon svg { width: 36px; height: 36px; }
+  .onboarding-content { padding: 28px 24px 24px; }
+  .onboarding-description { min-height: 0; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-overlay, .onboarding-card { animation: none; }
+}
+
+@keyframes onboarding-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes onboarding-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

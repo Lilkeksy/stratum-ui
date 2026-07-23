@@ -8,12 +8,12 @@ function StratumLogo({ size = 28, showText = true, textSize = 16, showTagline = 
           width: size,
           height: size,
           borderRadius: size * 0.28,
-          background: "#2F6FE4",
+          background: "var(--color-primary)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexShrink: 0,
-          boxShadow: "0 4px 14px rgba(47, 111, 228, 0.35)",
+          boxShadow: "0 5px 15px rgba(0, 91, 179, 0.24)",
         }}
       >
         <svg width={size * 0.62} height={size * 0.62} viewBox="0 0 48 48" fill="none">
@@ -24,11 +24,11 @@ function StratumLogo({ size = 28, showText = true, textSize = 16, showTagline = 
 
       {showText && (
         <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.15 }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: textSize, fontWeight: 700, color: "#16233F" }}>
+          <span style={{ fontFamily: "var(--font-body)", fontSize: textSize, fontWeight: 700, color: "var(--color-dark)" }}>
             Stratum
           </span>
           {showTagline && (
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", maxWidth: 130, color: "#7C8B9C", textTransform: "uppercase" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 9, fontWeight: 600, letterSpacing: "0.04em", maxWidth: 130, color: "var(--color-mute)", textTransform: "uppercase" }}>
               {t("Compliance Intelligence")}
             </span>
           )}

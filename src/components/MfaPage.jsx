@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { X } from "lucide-react";
 import { useI18n } from "../i18n/context";
 import "./AuthPage.css";
 
@@ -17,8 +18,8 @@ function MfaPage({ mfa, onVerify, onCancel }) {
     finally { setSubmitting(false); }
   };
   return (
-    <div className="auth-page">
-      <button className="auth-close" onClick={onCancel} aria-label={t("Cancel secure sign-in")}>×</button>
+    <div className="auth-page auth-page--mfa">
+      <button className="auth-close" onClick={onCancel} aria-label={t("Cancel secure sign-in")}><X size={18} strokeWidth={1.8} aria-hidden="true" /></button>
       <div className="auth-card auth-mfa-card">
         <h1 className="auth-title">{enrolling ? t("Secure your account") : t("Verification required")}</h1>
         <p className="auth-subtitle">{enrolling ? t("Set up Stratum in an authenticator app for your first secure sign-in.") : t("Open your authenticator app and enter the current Stratum code.")}</p>

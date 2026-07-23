@@ -143,6 +143,9 @@
 }
 
 .policy-card-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-primary);
@@ -178,6 +181,9 @@
 }
 
 .policy-compare-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
   background: none;
   border: none;
   color: var(--color-primary);
@@ -554,5 +560,199 @@
 @media (max-width: 640px) {
   .policy-summary-overview {
     flex-direction: column-reverse;
+  }
+}
+
+.policy-upload-select {
+  margin-right: auto;
+  color: var(--color-primary) !important;
+}
+
+.policy-upload-select.is-selected {
+  color: var(--color-mint-text) !important;
+}
+
+.policy-compare-view {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.policy-compare-heading {
+  margin-bottom: 22px;
+}
+
+.policy-compare-heading h1 {
+  margin: 0;
+  color: var(--color-dark);
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+}
+
+.policy-compare-heading p {
+  margin: 7px 0 0;
+  color: var(--color-mute);
+  font-size: 0.8rem;
+}
+
+.policy-compare-view .policy-compare-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  align-items: start;
+  gap: 15px;
+}
+
+.policy-compare-view .policy-compare-card {
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(22, 35, 63, 0.04);
+}
+
+.policy-compare-card-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px 12px;
+  min-height: 104px;
+  padding: 18px;
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-card) 60%, var(--color-white));
+}
+
+.policy-compare-card-header > div {
+  min-width: 0;
+}
+
+.policy-compare-card-header > div > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--color-primary);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.policy-compare-card-header h2 {
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-dark);
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.policy-compare-card-header small {
+  grid-column: 1 / -1;
+  color: var(--color-mute);
+  font-size: 0.65rem;
+}
+
+.policy-compare-section {
+  min-height: 98px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.policy-compare-section:last-child {
+  border-bottom: 0;
+}
+
+.policy-compare-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-mute);
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+}
+
+.policy-compare-section > p {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.policy-compare-risk-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.policy-compare-risk-row small {
+  color: var(--color-mute);
+  font-size: 0.64rem;
+}
+
+.policy-compare-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 16px;
+  color: var(--color-ink);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.policy-compare-list li::marker {
+  color: var(--color-primary);
+}
+
+.policy-compare-list strong,
+.policy-compare-list span {
+  display: block;
+}
+
+.policy-compare-list strong {
+  color: var(--color-dark);
+  font-size: 0.7rem;
+}
+
+.policy-compare-list span {
+  margin-top: 2px;
+  color: var(--color-mute);
+}
+
+.policy-compare-empty {
+  color: var(--color-mute) !important;
+  font-style: italic;
+}
+
+@media (max-width: 900px) {
+  .policy-compare-fab {
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    right: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .policy-library {
+    padding: 24px 14px 7rem;
+  }
+
+  .policy-search-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .policy-filters {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+  }
+
+  .policy-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .policy-filter-button {
+    flex: 0 0 auto;
   }
 }

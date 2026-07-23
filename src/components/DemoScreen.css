@@ -44,3 +44,20 @@
 .demo-policy-text::selection {
   background: rgba(59, 143, 212, 0.25);
 }
+
+.demo-floating-control {
+  position: absolute;
+  z-index: 1000;
+}
+
+.demo-floating-result {
+  position: absolute;
+  z-index: 1001;
+  width: min(340px, calc(100% - 24px));
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .demo-screen { padding: 24px 14px 7rem; }
+  .demo-policy-card { padding: 18px; }
+}

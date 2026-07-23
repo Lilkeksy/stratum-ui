@@ -1,7 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap');
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html,
+body {
+  overflow-x: hidden;
 }
 
 button {
@@ -9,21 +23,23 @@ button {
 }
 
 :root {
-  --color-dark: #16233F;
-  --color-primary: #2F6FE4;
-  --color-secondary: #6BA0F0;
-  --color-mint-bg: #D9F5E6;
-  --color-mint-text: #0F9D58;
-  --color-ink: #1F2937;
-  --color-mute: #7C8B9C;
-  --color-card: #EFF3F8;
+  --color-dark: #202A36;
+  --color-primary: #005BB3;
+  --color-secondary: #0073DF;
+  --color-mint-bg: #D9F8ED;
+  --color-mint-text: #007056;
+  --color-ink: #414754;
+  --color-mute: #747B86;
+  --color-card: #F3F4F5;
   --color-white: #FFFFFF;
   --color-danger: #D3453C;
   --color-danger-bg: #FCEBEA;
   --color-warning: #F59E0B;
   --color-warning-bg: #FEF3E2;
+  --color-border: #DDE2E8;
 
   --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Source Serif 4", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
   --font-size-sm: 0.8rem;
   --font-size-base: 0.95rem;
   --font-size-md: 1.1rem;
@@ -38,15 +54,17 @@ button {
 
   --radius-sm: 10px;
   --radius-md: 18px;
-  --shadow-card: 0 8px 24px rgba(22, 35, 63, 0.06);
-  --shadow-button: 0 4px 14px rgba(47, 111, 228, 0.28);
+  --shadow-card: 0 10px 28px rgba(22, 35, 63, 0.055);
+  --shadow-button: 0 6px 16px rgba(0, 91, 179, 0.2);
 }
 
 [data-theme="dark"] {
   --color-white: #10161F;
+  --color-dark: #F4F7FA;
   --color-ink: #E7EEF3;
-  --color-mute: #8CA0AE;
+  --color-mute: #9AA8B5;
   --color-card: #1A2530;
+  --color-border: #2D3946;
 }
 
 body {
@@ -57,7 +75,14 @@ body {
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-h1, h2, h3 {
+h1, h2 {
+  font-family: var(--font-display);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  font-optical-sizing: auto;
+}
+
+h3 {
+  font-family: var(--font-body);
+  font-weight: 650;
+  letter-spacing: -0.025em;
 }

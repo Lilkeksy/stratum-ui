@@ -9,7 +9,7 @@ function HelpScreen() {
     ["How does Stratum summarize a policy?", "Upload a policy document and Stratum extracts the text, analyzes its clauses, and creates an evidence-linked plain-language summary."],
     ["Does Stratum work outside the app?", "The current web version handles uploaded policies and includes a selection demo. System-wide text selection is planned for a later desktop or browser integration."],
     ["What do the colored flags mean?", "Red flags indicate high-risk clauses. Amber flags highlight moderate concerns. Teal flags mark lower-risk or reassuring findings."],
-    ["Can I compare two policies?", "Yes. Open Policy Library, select two or more featured policies, and choose Compare."],
+    ["Can I compare two policies?", "Yes. Select any two or more Ready uploads or featured policies, then choose Compare."],
     ["How do I change the app language?", "Open Settings and choose App and summary language. The interface changes immediately, and new or regenerated summaries use the same language."],
   ];
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { FileText, RefreshCw, Search, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, FileText, RefreshCw, Search, Trash2 } from "lucide-react";
 import { policyApi } from "../lib/api";
 import { useI18n } from "../i18n/context";
 import "./PolicyLibrary.css";
@@ -33,6 +33,11 @@ function SummaryList({ title, items }) {
   return <section className="policy-summary-section"><h3>{title}</h3><ul>{items.map((item, index) => <li key={`${title}-${index}`}>{item}</li>)}</ul></section>;
 }
 
+function CompareList({ items, emptyText }) {
+  if (!items?.length) return <p className="policy-compare-empty">{emptyText}</p>;
+  return <ul className="policy-compare-list">{items.map((item, index) => <li key={`${item.title || item}-${index}`}>{typeof item === "string" ? item : <><strong>{item.title}</strong>{item.explanation && <span>{item.explanation}</span>}</>}</li>)}</ul>;
+}
+
 function PolicyLibrary({ user, refreshKey = 0 }) {
   const { locale, t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,52 +53,117 @@ function PolicyLibrary({ user, refreshKey = 0 }) {
 
   useEffect(() => {
     if (!user) return undefined;
-    let cancelled = false; let timer;
+    let cancelled = false;
+    let timer;
     const loadAndSchedule = async () => {
       try {
         const result = await policyApi.list();
         if (cancelled) return;
-        setDocuments(result.documents); setDocumentsError("");
-        if (result.documents.some((document) => ["uploaded", "processing", "summarizing"].includes(document.status) || (document.status === "extracted" && result.aiConfigured))) timer = window.setTimeout(loadAndSchedule, 3000);
-      } catch (error) { if (!cancelled) setDocumentsError(error.message || t("Unable to load uploaded policies.")); }
-      finally { if (!cancelled) setDocumentsLoading(false); }
+        setDocuments(result.documents);
+        setDocumentsError("");
+        if (result.documents.some((document) => ["uploaded", "processing", "summarizing"].includes(document.status) || (document.status === "extracted" && result.aiConfigured))) {
+          timer = window.setTimeout(loadAndSchedule, 3000);
+        }
+      } catch (error) {
+        if (!cancelled) setDocumentsError(error.message || t("Unable to load uploaded policies."));
+      } finally {
+        if (!cancelled) setDocumentsLoading(false);
+      }
     };
     void loadAndSchedule();
-    return () => { cancelled = true; window.clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
   }, [refreshKey, t, user]);
 
   const sorted = useMemo(() => [...demoPolicies].sort((a, b) => b.sortDate.localeCompare(a.sortDate)), []);
   const visible = sorted.filter((policy) => policy.company.toLowerCase().includes(searchQuery.toLowerCase()) && (activeFilter === "all" || policy.category === activeFilter));
-  const selectedPolicies = demoPolicies.filter((policy) => selectedIds.includes(policy.id));
-  const canCompare = selectedIds.length >= 2;
+  const comparablePolicies = useMemo(() => [
+    ...demoPolicies.map((policy) => ({
+      id: policy.id,
+      kind: "featured",
+      title: policy.company,
+      version: policy.version,
+      date: policy.sortDate,
+      overview: policy.summary,
+      riskLevel: null,
+      confidence: null,
+      keyPoints: [],
+      riskFlags: [],
+      sharedWith: [],
+      retention: "",
+      userRights: [],
+      financialTerms: [],
+    })),
+    ...documents.filter((document) => document.status === "ready" && document.summary).map((document) => ({
+      id: `upload:${document.id}`,
+      kind: "upload",
+      title: document.original_name,
+      version: "",
+      date: document.created_at,
+      overview: document.summary.overview,
+      riskLevel: document.summary.risk_level,
+      confidence: document.summary.confidence,
+      keyPoints: document.summary.key_points || [],
+      riskFlags: document.summary.risk_flags || [],
+      sharedWith: document.summary.data_practices?.shared_with || [],
+      retention: document.summary.data_practices?.retention || "",
+      userRights: document.summary.user_rights || [],
+      financialTerms: document.summary.financial_terms || [],
+    })),
+  ], [documents]);
+  const selectedPolicies = comparablePolicies.filter((policy) => selectedIds.includes(policy.id));
+  const canCompare = selectedPolicies.length >= 2;
+
   const toggleSelect = (id) => setSelectedIds((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   const openDocument = async (document) => {
     if (document.status !== "ready") return;
-    try { const result = await policyApi.get(document.id); setActiveDocument(result.document); setDocumentsError(""); }
-    catch (error) { setDocumentsError(error.message || t("Unable to open policy text.")); }
+    try {
+      const result = await policyApi.get(document.id);
+      setActiveDocument(result.document);
+      setDocumentsError("");
+    } catch (error) {
+      setDocumentsError(error.message || t("Unable to open policy text."));
+    }
   };
   const retryDocument = async (documentId) => {
-    try { const result = await policyApi.retry(documentId); setDocuments((current) => current.map((document) => document.id === documentId ? { ...document, ...result.document } : document)); setDocumentsError(""); }
-    catch (error) { setDocumentsError(error.message || t("Unable to retry policy processing.")); }
+    try {
+      const result = await policyApi.retry(documentId);
+      setDocuments((current) => current.map((document) => document.id === documentId ? { ...document, ...result.document } : document));
+      setSelectedIds((current) => current.filter((id) => id !== `upload:${documentId}`));
+      setDocumentsError("");
+    } catch (error) {
+      setDocumentsError(error.message || t("Unable to retry policy processing."));
+    }
   };
   const deleteDocument = async (documentId) => {
     if (!window.confirm(t("Delete this uploaded policy?"))) return;
-    try { await policyApi.remove(documentId); setDocuments((current) => current.filter((document) => document.id !== documentId)); setDocumentsError(""); }
-    catch (error) { setDocumentsError(error.message || t("Unable to delete policy.")); }
+    try {
+      await policyApi.remove(documentId);
+      setDocuments((current) => current.filter((document) => document.id !== documentId));
+      setSelectedIds((current) => current.filter((id) => id !== `upload:${documentId}`));
+      setDocumentsError("");
+    } catch (error) {
+      setDocumentsError(error.message || t("Unable to delete policy."));
+    }
   };
 
   if (activeDocument) return (
     <div className="policy-library">
-      <button className="policy-compare-back" onClick={() => setActiveDocument(null)}>← {t("Back to Library")}</button>
+      <button className="policy-compare-back" onClick={() => setActiveDocument(null)}><ArrowLeft size={16} strokeWidth={1.8} aria-hidden="true" />{t("Back to Library")}</button>
       <div className="policy-document-detail">
-        <span className="policy-document-status ready">{t("Ready")}</span><h1 className="policy-library-title">{activeDocument.original_name}</h1>
+        <span className="policy-document-status ready">{t("Ready")}</span>
+        <h1 className="policy-library-title">{activeDocument.original_name}</h1>
         <p className="policy-library-subtitle">{activeDocument.word_count?.toLocaleString(locale)} {t("words")} · {activeDocument.extraction_method}{activeDocument.page_count ? ` · ${activeDocument.page_count} ${t(activeDocument.page_count === 1 ? "page" : "pages")}` : ""}</p>
         {activeDocument.summary ? <div className="policy-ai-summary">
           <div className="policy-summary-overview"><div><span className="policy-summary-label">{t("Plain-language summary")}</span><p>{activeDocument.summary.overview}</p></div><span className={`policy-risk-level ${activeDocument.summary.risk_level}`}>{t(activeDocument.summary.risk_level)} {t("risk")}</span></div>
           <SummaryList title={t("Key points")} items={activeDocument.summary.key_points} />
           {activeDocument.summary.risk_flags?.length > 0 && <section className="policy-summary-section"><h3>{t("Risk flags")}</h3><div className="policy-risk-grid">{activeDocument.summary.risk_flags.map((flag, index) => <article key={`${flag.title}-${index}`} className={`policy-risk-flag ${flag.severity}`}><div><strong>{flag.title}</strong><span>{t(flag.severity)}</span></div><p>{flag.explanation}</p>{flag.evidence && <blockquote>{flag.evidence}</blockquote>}{flag.evidence_ids?.length > 0 && <small className="policy-evidence-ids">{t("Source")} {flag.evidence_ids.join(" · ")}</small>}</article>)}</div></section>}
           <section className="policy-summary-section"><h3>{t("Data practices")}</h3><div className="policy-data-grid"><SummaryList title={t("Collected")} items={activeDocument.summary.data_practices?.collected} /><SummaryList title={t("Shared with")} items={activeDocument.summary.data_practices?.shared_with} /><SummaryList title={t("Purposes")} items={activeDocument.summary.data_practices?.purposes} /></div><p className="policy-retention"><strong>{t("Retention:")}</strong> {activeDocument.summary.data_practices?.retention}</p></section>
-          <SummaryList title={t("User rights")} items={activeDocument.summary.user_rights} /><SummaryList title={t("Financial and cancellation terms")} items={activeDocument.summary.financial_terms} /><SummaryList title={t("Recommended actions")} items={activeDocument.summary.recommended_actions} />
+          <SummaryList title={t("User rights")} items={activeDocument.summary.user_rights} />
+          <SummaryList title={t("Financial and cancellation terms")} items={activeDocument.summary.financial_terms} />
+          <SummaryList title={t("Recommended actions")} items={activeDocument.summary.recommended_actions} />
           <p className="policy-ai-model">{activeDocument.summary?._meta?.model || "NVIDIA NIM"}{Number.isFinite(activeDocument.summary?.confidence) ? ` · ${Math.round(activeDocument.summary.confidence * 100)}% ${t("confidence")}` : ""}{activeDocument.summary?._meta?.escalated ? ` · ${t("reasoning verified")}` : ""}{activeDocument.summary?._meta?.cache_hit ? ` · ${t("cached analysis")}` : ""}</p>
         </div> : <p className="policy-library-hint">{t("The text is extracted, but an AI summary has not been generated yet.")}</p>}
         <details className="policy-extracted-details"><summary>{t("View extracted source text")}</summary><pre className="policy-document-text">{activeDocument.extracted_text}</pre></details>
@@ -101,18 +171,85 @@ function PolicyLibrary({ user, refreshKey = 0 }) {
     </div>
   );
 
-  if (view === "compare") return <div className="policy-library"><button className="policy-compare-back" onClick={() => setView("library")}>← {t("Back to Library")}</button><div className="policy-compare-columns">{selectedPolicies.map((policy) => <div key={policy.id} className="policy-compare-card"><div className="policy-compare-card-title">{policy.company} <span className="policy-card-version">{policy.version}</span></div><span className="policy-compare-card-date">{t("Scanned")} {formatDate(policy.sortDate)}</span><p className="policy-compare-card-summary">{t(policy.summary)}</p></div>)}</div></div>;
+  if (view === "compare") return (
+    <div className="policy-library policy-compare-view">
+      <button className="policy-compare-back" onClick={() => setView("library")}><ArrowLeft size={16} strokeWidth={1.8} aria-hidden="true" />{t("Back to Library")}</button>
+      <div className="policy-compare-heading"><h1>{t("Policy comparison")}</h1><p>{t("Review the same questions across each selected policy.")}</p></div>
+      <div className="policy-compare-columns">
+        {selectedPolicies.map((policy) => (
+          <article key={policy.id} className="policy-compare-card">
+            <header className="policy-compare-card-header">
+              <div><span>{policy.kind === "upload" ? t("Your upload") : t("Featured policy")}</span><h2 title={policy.title}>{policy.title}</h2></div>
+              {policy.version && <span className="policy-card-version">{policy.version}</span>}
+              <small>{formatDate(policy.date)}</small>
+            </header>
+            <section className="policy-compare-section">
+              <span className="policy-compare-label">{t("Overall risk")}</span>
+              {policy.riskLevel ? <div className="policy-compare-risk-row"><span className={`policy-risk-level ${policy.riskLevel}`}>{t(policy.riskLevel)} {t("risk")}</span>{Number.isFinite(policy.confidence) && <small>{Math.round(policy.confidence * 100)}% {t("confidence")}</small>}</div> : <p className="policy-compare-empty">{t("Not scored")}</p>}
+            </section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Plain-language summary")}</span><p>{policy.kind === "featured" ? t(policy.overview) : policy.overview}</p></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Key points")}</span><CompareList items={policy.keyPoints} emptyText={t("Not specified")} /></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Risk flags")}</span><CompareList items={policy.riskFlags} emptyText={t("No risk flags identified")} /></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Shared with")}</span><CompareList items={policy.sharedWith} emptyText={t("Not specified")} /></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Retention:")}</span><p>{policy.retention || t("Not specified")}</p></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("User rights")}</span><CompareList items={policy.userRights} emptyText={t("Not specified")} /></section>
+            <section className="policy-compare-section"><span className="policy-compare-label">{t("Financial and cancellation terms")}</span><CompareList items={policy.financialTerms} emptyText={t("Not specified")} /></section>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="policy-library">
-      <h1 className="policy-library-title">{t("Policy Library")}</h1><p className="policy-library-subtitle">{t("Your uploaded policies are processed privately and prepared for plain-language summaries.")}</p>
-      {user && <section className="policy-uploaded-section"><div className="policy-section-heading"><h2>{t("Your uploads")}</h2><span>{documents.length}</span></div>{documentsError && <p className="policy-library-error" role="alert">{documentsError}</p>}{documentsLoading ? <p className="policy-library-hint">{t("Loading your policies…")}</p> : documents.length === 0 ? <div className="policy-upload-empty"><FileText size={22} /><span>{t("No uploaded policies yet.")}</span></div> : <div className="policy-grid policy-upload-grid">{documents.map((document) => <article key={document.id} className={`policy-card policy-upload-card ${document.status === "ready" ? "is-openable" : ""}`} onClick={() => openDocument(document)}><div className="policy-card-top"><span className="policy-card-company" title={document.original_name}>{document.original_name}</span><span className={`policy-document-status ${document.status}`}>{document.status === "ready" ? t("Ready") : t(document.status)}</span></div><span className="policy-card-meta">{t("Uploaded")} {formatDate(document.created_at)}</span><p className="policy-card-summary">{statusDescription(document, t)}</p><div className="policy-document-actions">{document.status === "ready" && <><span className="policy-card-select">{t("View summary")}</span><button type="button" onClick={(event) => { event.stopPropagation(); retryDocument(document.id); }}><RefreshCw size={14} /> {t("Regenerate")}</button></>}{document.status === "failed" && <button type="button" onClick={(event) => { event.stopPropagation(); retryDocument(document.id); }}><RefreshCw size={14} /> {t("Retry")}</button>}<button type="button" className="danger" onClick={(event) => { event.stopPropagation(); deleteDocument(document.id); }}><Trash2 size={14} /> {t("Delete")}</button></div></article>)}</div>}</section>}
+      <h1 className="policy-library-title">{t("Policy Library")}</h1>
+      <p className="policy-library-subtitle">{t("Your uploaded policies are processed privately and prepared for plain-language summaries.")}</p>
+
+      {user && <section className="policy-uploaded-section">
+        <div className="policy-section-heading"><h2>{t("Your uploads")}</h2><span>{documents.length}</span></div>
+        {documentsError && <p className="policy-library-error" role="alert">{documentsError}</p>}
+        {documentsLoading ? <p className="policy-library-hint">{t("Loading your policies…")}</p> : documents.length === 0 ? <div className="policy-upload-empty"><FileText size={22} /><span>{t("No uploaded policies yet.")}</span></div> : (
+          <div className="policy-grid policy-upload-grid">
+            {documents.map((document) => {
+              const selectionId = `upload:${document.id}`;
+              const selectable = document.status === "ready" && Boolean(document.summary);
+              const isSelected = selectedIds.includes(selectionId);
+              return (
+                <article key={document.id} className={`policy-card policy-upload-card ${document.status === "ready" ? "is-openable" : ""} ${isSelected ? "selected" : ""}`} onClick={() => openDocument(document)}>
+                  <div className="policy-card-top">
+                    <span className="policy-card-company" title={document.original_name}>{document.original_name}</span>
+                    <span className={`policy-document-status ${document.status}`}>{document.status === "ready" ? t("Ready") : t(document.status)}</span>
+                  </div>
+                  <span className="policy-card-meta">{t("Uploaded")} {formatDate(document.created_at)}</span>
+                  <p className="policy-card-summary">{statusDescription(document, t)}</p>
+                  <div className="policy-document-actions">
+                    {selectable && <button type="button" className={`policy-upload-select ${isSelected ? "is-selected" : ""}`} aria-pressed={isSelected} onClick={(event) => { event.stopPropagation(); toggleSelect(selectionId); }}>{isSelected && <Check size={13} strokeWidth={2} />}{t(isSelected ? "Selected" : "Select policy")}</button>}
+                    {document.status === "ready" && <button type="button" onClick={(event) => { event.stopPropagation(); retryDocument(document.id); }}><RefreshCw size={14} />{t("Regenerate")}</button>}
+                    {document.status === "failed" && <button type="button" onClick={(event) => { event.stopPropagation(); retryDocument(document.id); }}><RefreshCw size={14} />{t("Retry")}</button>}
+                    <button type="button" className="danger" onClick={(event) => { event.stopPropagation(); deleteDocument(document.id); }}><Trash2 size={14} />{t("Delete")}</button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>}
+
       <div className="policy-section-heading policy-featured-heading"><h2>{t("Featured policies")}</h2></div>
-      <div className="policy-library-controls"><div className="policy-search-wrap"><Search size={16} color="var(--color-mute)" /><input type="text" className="policy-search" placeholder={t("Search companies…")} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} /></div><div className="policy-filters">{filters.map((filter) => <button key={filter.id} className={`policy-filter-button ${activeFilter === filter.id ? "active" : ""}`} onClick={() => setActiveFilter(filter.id)}>{filter.label}</button>)}</div></div>
-      <p className="policy-library-hint">{t("Select two or more featured policies to compare.")}</p>
-      <div className="policy-grid">{visible.map((policy) => { const isSelected = selectedIds.includes(policy.id); return <div key={policy.id} className={`policy-card ${isSelected ? "selected" : ""}`} onClick={() => toggleSelect(policy.id)}><div className="policy-card-top"><span className="policy-card-company">{policy.company}</span><span className="policy-card-version">{policy.version}</span></div><span className="policy-card-meta">{t("Scanned")} {formatDate(policy.sortDate)} <span className="dot">·</span> {t(policy.category === "social" ? "Social" : policy.category === "ai" ? "AI" : "Workspace")}</span><p className="policy-card-summary">{t(policy.summary)}</p><span className="policy-card-select">{t(isSelected ? "Selected ✓" : "Select policy")}</span></div>; })}</div>
-      {selectedIds.length > 0 && <button className={`policy-compare-fab ${canCompare ? "enabled" : "disabled"}`} disabled={!canCompare} onClick={() => canCompare && setView("compare")}>{t("Compare")}{selectedIds.length > 1 ? ` (${selectedIds.length})` : ""}</button>}
+      <div className="policy-library-controls">
+        <div className="policy-search-wrap"><Search size={16} color="var(--color-mute)" /><input type="text" className="policy-search" placeholder={t("Search companies…")} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} /></div>
+        <div className="policy-filters">{filters.map((filter) => <button key={filter.id} className={`policy-filter-button ${activeFilter === filter.id ? "active" : ""}`} onClick={() => setActiveFilter(filter.id)}>{filter.label}</button>)}</div>
+      </div>
+      <p className="policy-library-hint">{t("Select two or more policies to compare.")}</p>
+      <div className="policy-grid">
+        {visible.map((policy) => {
+          const isSelected = selectedIds.includes(policy.id);
+          return <div key={policy.id} className={`policy-card ${isSelected ? "selected" : ""}`} onClick={() => toggleSelect(policy.id)}><div className="policy-card-top"><span className="policy-card-company">{policy.company}</span><span className="policy-card-version">{policy.version}</span></div><span className="policy-card-meta">{t("Scanned")} {formatDate(policy.sortDate)} <span className="dot">·</span> {t(policy.category === "social" ? "Social" : policy.category === "ai" ? "AI" : "Workspace")}</span><p className="policy-card-summary">{t(policy.summary)}</p><span className="policy-card-select">{isSelected && <Check size={13} strokeWidth={2} aria-hidden="true" />}{t(isSelected ? "Selected" : "Select policy")}</span></div>;
+        })}
+      </div>
+      {selectedPolicies.length > 0 && <button className={`policy-compare-fab ${canCompare ? "enabled" : "disabled"}`} disabled={!canCompare} onClick={() => canCompare && setView("compare")}>{t("Compare")}{selectedPolicies.length > 1 ? ` (${selectedPolicies.length})` : ""}</button>}
     </div>
   );
 }
+
 export default PolicyLibrary;

@@ -90,6 +90,10 @@ TRANSLATION_TIMEOUT_MS=30000
 In Google mode, Stratum analyzes once in English and translates only user-facing summary fields. The key is server-only and must never use a `VITE_` prefix. Changing a language does not rewrite saved summaries automatically; use **Regenerate** on a policy or upload a new document.
 Interface translations are bundled in `src/i18n/locales`, so navigation and page copy do not use a translation API at runtime. Run `npm run check:locales` to verify that every literal `t()` phrase is registered and each locale contains a safe value. French, Spanish, and Portuguese catalogs are machine-assisted drafts; Hausa, Yorùbá, and Igbo use curated core-interface dictionaries with explicit English fallbacks for longer technical or legal copy until native-speaker review. Update the locale JSON files to improve wording without changing components.
 
+## Guest entry flow
+
+Signed-out visitors are not sent directly to authentication. A new visitor chooses a language, sees the short product walkthrough, and enters the interactive Demo. Returning guests land directly on the Demo. Login or signup is requested only when a visitor chooses a protected action such as uploading or accessing saved account data; a successful login returns the user to the Dashboard.
+
 ## Email redirects
 
 Set `APP_PUBLIC_URL` to the public HTTPS URL where Stratum is deployed. In Supabase, open **Authentication > URL Configuration**, set the Site URL to the same deployed origin, and allow these exact redirect URLs:
@@ -112,3 +116,7 @@ npm run lint
 npm run build
 npm audit --audit-level=high
 ```
+
+## Render deployment
+
+Use the repository's `render.yaml` Blueprint to deploy the React frontend and Express API as one same-origin web service. See [docs/RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md) for the exact environment-variable, Supabase redirect, and post-deployment checklist. Keep `.env.local` local and copy only its values into Render's encrypted environment settings.

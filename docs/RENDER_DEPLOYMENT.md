@@ -1,0 +1,57 @@
+# Deploying Stratum on Render
+
+Stratum is configured as one Render web service. The production Express process serves both the built React application and the same-origin API, which keeps authentication cookies and API requests on one HTTPS origin.
+
+## Blueprint deployment
+
+1. Push this repository to GitHub.
+2. In Render, choose **New > Blueprint** and connect the repository.
+3. Render reads `render.yaml` and asks for every environment value marked `sync: false`.
+4. After Render assigns the service URL, set both `APP_PUBLIC_URL` and `APP_ORIGIN` to that exact HTTPS origin, without a trailing slash. Example: `https://stratum.onrender.com`.
+5. Deploy again after those URL values are saved.
+
+Render supplies `PORT` automatically. Do not add `PORT` or `API_PORT` in the Render dashboard.
+
+## Required environment variables
+
+| Variable | Render value |
+| --- | --- |
+| `NODE_ENV` | `production` |
+| `APP_PUBLIC_URL` | The exact public Render HTTPS origin |
+| `APP_ORIGIN` | The same public Render HTTPS origin |
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
+| `SUPABASE_SECRET_KEY` | Supabase server secret key |
+| `NVIDIA_NIM_API_KEY` | NVIDIA NIM API key |
+
+The remaining model, timeout, prompt, worker, and translation defaults are declared safely in `render.yaml`. If Google translation is enabled later, change `TRANSLATION_PROVIDER` to `google` and add the server-only `GOOGLE_TRANSLATE_API_KEY`.
+
+Never place `SUPABASE_SECRET_KEY`, `NVIDIA_NIM_API_KEY`, or `GOOGLE_TRANSLATE_API_KEY` in a variable beginning with `VITE_`.
+
+## Supabase redirect configuration
+
+In Supabase **Authentication > URL Configuration**:
+
+- Set the Site URL to the Render HTTPS origin.
+- Add `https://your-render-domain/?auth_action=confirmed`.
+- Add `https://your-render-domain/?auth_action=recovery`.
+
+Keep localhost redirect entries only for local development.
+
+## Local files
+
+- `.env.local` contains local secret values and is intentionally ignored by Git.
+- `.env.example` is the safe copyable template and contains placeholders only.
+- `render.yaml` is the deployment blueprint and contains no credentials.
+
+Do not upload or commit `.env.local`.
+
+## Verification
+
+After deployment:
+
+1. Open `/api/health` and confirm `status` is `ok`.
+2. Load the root URL and confirm the React application appears.
+3. Create a test account and verify the confirmation link returns to the Render domain.
+4. Log out and back in to verify secure production cookies.
+5. Upload a small text PDF and wait for the policy status to reach **Ready**.

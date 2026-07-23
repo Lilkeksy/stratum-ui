@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
@@ -12,7 +14,15 @@ import { getAiConfiguration } from './services/nvidiaService.js'
 
 const app = express()
 app.set('trust proxy', 1)
-app.use(helmet())
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      'font-src': ["'self'", 'data:', 'https://fonts.gstatic.com'],
+      'img-src': ["'self'", 'data:', 'blob:'],
+    },
+  },
+}))
 app.use(express.json({ limit: '1mb' }))
 app.use(cookieParser())
 
@@ -47,6 +57,17 @@ app.use('/api', (_request, response) => {
   response.status(404).json({ error: 'API route not found' })
 })
 
+const distPath = path.resolve(process.cwd(), 'dist')
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath))
+  app.use((request, response, next) => {
+    if (request.method === 'GET' && request.accepts('html')) {
+      return response.sendFile(path.join(distPath, 'index.html'))
+    }
+    next()
+  })
+}
+
 app.use((error, _request, response, _next) => {
   if (error instanceof ZodError) {
     return response.status(400).json({ error: 'Invalid request', details: error.flatten() })
@@ -66,7 +87,7 @@ app.use((error, _request, response, _next) => {
   response.status(500).json({ error: 'Internal server error' })
 })
 
-app.listen(env.port, '127.0.0.1', async () => {
+app.listen(env.port, '0.0.0.0', async () => {
   console.log(`Stratum API listening on http://127.0.0.1:${env.port}`)
   startPolicyProcessor()
   try {

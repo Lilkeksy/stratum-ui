@@ -1,6 +1,6 @@
 # Stratum Project Progress
 
-Last updated: 2026-07-22
+Last updated: 2026-07-23
 
 ## Purpose
 
@@ -26,17 +26,31 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 
 - Built the application in React and Vite from the Stratum designs.
 - Added language selection and a short onboarding flow.
+- Made the signed-out experience public-first: new visitors see language selection and onboarding before the interactive Demo, while returning guests land directly on the Demo instead of a login wall.
+- Keep upload, saved-policy, account, and MFA operations protected; successful authentication returns the user to the Dashboard.
+- Made cookie-session restoration visually silent during normal refreshes so authenticated users do not see guest controls or a repetitive loading message; a neutral branded fallback appears only when validation is unusually slow.
+- Reworked the application shell for narrow screens: the desktop sidebar becomes a fixed bottom navigation below 900px, labels collapse accessibly on very small phones, content columns stack, and viewport widths are clamped to prevent horizontal scrolling.
+- Replaced emoji, Unicode control glyphs, and placeholder letter icons with consistent code-native SVGs, including navigation, authentication providers, close actions, policy selection, status flags, and back actions.
+- Rebuilt onboarding with code-native SVG icons, clearer progress, responsive composition, and the original blue, mint, green, and neutral Stratum palette.
+- Rebalanced Settings into a centered responsive grid, moved accent/font controls into Appearance, and tightened typography, spacing, surfaces, and control states.
 - Persist the onboarding language to Supabase and expose the same seven-language selector in Settings.
 - Added a shared React i18n provider so the navigation shell and product screens update immediately when language changes.
 - Bundled French, Spanish, Portuguese, Hausa, Yorùbá, and Igbo UI catalogs; runtime UI switching does not call a translation API.
 - Added locale-aware policy dates and a catalog coverage checker.
 - Added Regenerate on completed policies so language and response-style changes can be applied.
 - Added Dashboard, Policy Library, Demo, Help, Settings, login, signup, signed-out, and password-recovery experiences.
+- Redesigned authentication as a responsive, trust-focused split screen with explicit field labels, email/phone choice, password visibility controls, and no dead OAuth buttons.
+- Extended policy comparison to any two or more completed uploads using their saved overview, risk level, confidence, key points, risk flags, sharing, retention, user rights, and financial terms; uploaded and featured policies can be mixed in one comparison.
+- Deferred the next Dashboard redesign until the product team supplies its reference interface.
 - Added light and dark themes, personalization controls, and a concise-to-detailed response-style setting.
 - Replaced the former AI Assistant navigation action with policy upload.
 - Added a blurred upload-modal backdrop and automatic modal dismissal after a successful upload.
 - Added responsive featured-policy cards, search, category filters, selection, and comparison behavior.
 - Added a simulated text-selection demo and staged Stratum summary interaction.
+- Fixed the Demo summary popover's collapsed-width bug by giving the floating result a stable responsive container and clamping selection-driven positioning within the Demo viewport.
+- Made the public authentication interface email-only and removed the unused phone option and its interface copy.
+- Added a deliberate serif display and sans-serif interface typography hierarchy across page headings, navigation, controls, metadata, and body copy.
+- Added a Render Blueprint and deployment guide, made the Express server honor Render's `PORT`, bind to `0.0.0.0`, serve the built React application, and keep the UI/API on one production origin.
 - Updated the dashboard with user profile and account statistics.
 - Removed the redundant New Summary action, Data Analytics item, and Delete Account action.
 
@@ -112,7 +126,6 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 | --- | --- | --- |
 | `202607210001_profiles_preferences.sql` | User profiles and preferences | Applied |
 | `202607210002_policy_documents.sql` | Policy metadata, private storage bucket, and RLS | Applied |
-| `202607210003_policy_processing.sql` | Reserved/empty migration | No action required |
 | `202607210004_ai_processing_pipeline.sql` | Content hashes, durable jobs, AI runs, and atomic claiming | Applied |
 | `202607220005_enforce_mfa.sql` | Restrictive AAL2 policies for profiles, preferences, documents, and policy storage | Applied |
 
@@ -151,11 +164,16 @@ The frontend never receives server-only provider credentials. The application st
 
 ## Validation record
 
-Latest local checks on 2026-07-22:
+Latest local checks on 2026-07-23:
 
 - `npm run lint` passed.
 - `npm run build` passed.
+- `npm run check:locales` confirmed all 203 literal translation calls remain cataloged after the responsive and icon cleanup.
 - `npm audit --audit-level=high` reported zero vulnerabilities.
+- The automated regression suite passed all five tests.
+- The local Vite UI returned HTTP 200 after the final responsive production build.
+- The redesigned authentication and uploaded-policy comparison passed locale validation, lint, the production build, all five regression tests, and a zero-vulnerability dependency audit; the local UI returned HTTP 200.
+- The Demo, email-only authentication, typography, and Render production path passed locale validation, lint, the production build, all five regression tests, server syntax checks, and a live production-process probe returning HTTP 200 for the React root and ok for /api/health.
 - Backend JavaScript syntax checks passed.
 - Evidence chunking produced stable, unique evidence IDs across multiple chunks.
 - Local environment resolves Nano as the fast model and Super as the reasoning model.
@@ -169,7 +187,8 @@ Latest local checks on 2026-07-22:
 - The final MFA and preference frontend production build passed.
 - The automated regression suite passed five tests covering JWT AAL parsing, verified MFA factors, evidence IDs, response-style prompts, and evidence-safe language translation.
 - The API health response confirms NVIDIA translation mode is configured, and the production frontend build with full-interface language switching passed.
-- Locale validation confirms all 196 literal translation calls are registered and all six non-English catalogs contain safe values.
+- Locale validation confirms all 203 literal translation calls are registered and all six non-English catalogs contain safe values.
+- The public-first guest entry flow passed locale validation, lint, the production build, and all five regression tests; the local UI and API health endpoints remained available.
 
 Earlier NVIDIA hosted-trial checks confirmed the API key and model availability, but Gemma inference requests timed out. This is why Gemma is currently a challenger rather than the production default. Hosted trial latency must not be treated as production capacity.
 
@@ -208,6 +227,7 @@ Earlier NVIDIA hosted-trial checks confirmed the API key and model availability,
 - [x] Apply response-style preferences to AI output generation without weakening factual completeness.
 - [x] Persist the onboarding and Settings language preference to `profiles.preferred_language`.
 - [x] Localize the application shell, Dashboard, Settings, Policy Library, upload, Demo, Help, authentication, MFA, and onboarding without a runtime translation API.
+- [x] Let signed-out visitors explore onboarding and the interactive Demo before asking them to authenticate for protected actions.
 - [ ] Have native speakers review and refine the Hausa, Yorùbá, and Igbo long-form/technical fallback copy.
 - [x] Apply the selected language to new and regenerated AI summaries without translating exact evidence.
 - [ ] Enable and evaluate Google Cloud Translation for Hausa, Yorùbá, and Igbo before choosing the production translation provider.

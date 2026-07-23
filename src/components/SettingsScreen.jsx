@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
-import { Palette, User, SlidersHorizontal, Sparkles, Check, Languages } from "lucide-react";
+import { Palette, User, SlidersHorizontal, FileText, Check, Languages, Sun, Moon } from "lucide-react";
 import { preferencesApi } from "../lib/api";
 import { languages, normalizeLanguage } from "../lib/languages";
 import { useI18n } from "../i18n/context";
 import "./SettingsScreen.css";
 
 const accentPresets = [
-  { id: "blue", label: "Blue", primary: "#2F6FE4", secondary: "#6BA0F0" },
-  { id: "teal", label: "Teal", primary: "#0F9D58", secondary: "#4ECB8C" },
+  { id: "blue", label: "Blue", primary: "#005BB3", secondary: "#0073DF" },
+  { id: "teal", label: "Teal", primary: "#007056", secondary: "#7CF5CC" },
   { id: "purple", label: "Purple", primary: "#7C5CFC", secondary: "#A78BFA" },
   { id: "coral", label: "Coral", primary: "#E4573B", secondary: "#F0876F" },
   { id: "rose", label: "Rose", primary: "#DB4D8A", secondary: "#EB84B4" },
@@ -133,7 +133,7 @@ function SettingsScreen({ user }) {
           <div>
             <span className="settings-profile-name">{displayUser.name}</span>
             <span className="settings-profile-meta">
-              {displayUser.email} <span className="dot">◆</span> {displayUser.role}
+              {displayUser.email} <span className="dot" aria-hidden="true" /> {displayUser.role}
             </span>
           </div>
         </div>
@@ -146,7 +146,7 @@ function SettingsScreen({ user }) {
       </div>
 
       <div className="settings-grid">
-        <section className="settings-card">
+        <section className="settings-card settings-appearance-card">
           <div className="settings-card-header">
             <div className="settings-card-icon">
               <Palette size={16} />
@@ -169,7 +169,7 @@ function SettingsScreen({ user }) {
                 <span className="swatch-block swatch-accent" />
               </div>
               <div className="theme-swatch-label">
-                <span>☀ Light</span>
+                <span><Sun size={14} />{t("Light")}</span>
                 {theme === "light" && <Check size={14} />}
               </div>
             </button>
@@ -183,14 +183,44 @@ function SettingsScreen({ user }) {
                 <span className="swatch-block swatch-dark-accent" />
               </div>
               <div className="theme-swatch-label">
-                <span>☾ Dark</span>
+                <span><Moon size={14} />{t("Dark")}</span>
                 {theme === "dark" && <Check size={14} />}
               </div>
             </button>
           </div>
+
+          <label className="settings-label">{t("Accent color")}</label>
+          <div className="accent-swatch-row">
+            {accentPresets.map((preset) => (
+              <button
+                key={preset.id}
+                className={`accent-swatch ${accent === preset.id ? "active" : ""}`}
+                style={{ background: preset.primary }}
+                onClick={() => setAccent(preset.id)}
+                aria-label={t(preset.label)}
+              >
+                {accent === preset.id && <Check size={13} color="#fff" />}
+              </button>
+            ))}
+          </div>
+
+          <label className="settings-label">{t("Font")}</label>
+          <div className="font-option-row">
+            {fontPresets.map((preset) => (
+              <button
+                key={preset.id}
+                className={`font-option ${font === preset.id ? "active" : ""}`}
+                style={{ fontFamily: preset.family }}
+                onClick={() => setFont(preset.id)}
+              >
+                <span className="font-option-sample">{preset.sample}</span>
+                {preset.label}
+              </button>
+            ))}
+          </div>
         </section>
 
-        <section className="settings-card">
+        <section className="settings-card settings-personalization-card">
           <div className="settings-card-header">
             <div className="settings-card-icon">
               <User size={16} />
@@ -232,7 +262,7 @@ function SettingsScreen({ user }) {
           <div className="settings-toggle-row">
             <div className="settings-toggle-left">
               <div className="settings-card-icon small">
-                <Sparkles size={14} />
+                <FileText size={14} />
               </div>
               <div>
                 <span className="settings-row-label">{t("Automatic quick summaries")}</span>
@@ -250,35 +280,7 @@ function SettingsScreen({ user }) {
             </button>
           </div>
 
-          <label className="settings-label">{t("Accent color")}</label>
-          <div className="accent-swatch-row">
-            {accentPresets.map((preset) => (
-              <button
-                key={preset.id}
-                className={`accent-swatch ${accent === preset.id ? "active" : ""}`}
-                style={{ background: preset.primary }}
-                onClick={() => setAccent(preset.id)}
-                aria-label={t(preset.label)}
-              >
-                {accent === preset.id && <Check size={13} color="#fff" />}
-              </button>
-            ))}
-          </div>
 
-          <label className="settings-label">{t("Font")}</label>
-          <div className="font-option-row">
-            {fontPresets.map((preset) => (
-              <button
-                key={preset.id}
-                className={`font-option ${font === preset.id ? "active" : ""}`}
-                style={{ fontFamily: preset.family }}
-                onClick={() => setFont(preset.id)}
-              >
-                <span className="font-option-sample">{preset.sample}</span>
-                {preset.label}
-              </button>
-            ))}
-          </div>
         </section>
       </div>
 
