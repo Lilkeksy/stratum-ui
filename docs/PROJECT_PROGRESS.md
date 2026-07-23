@@ -121,6 +121,7 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 - Verified that tracked and unignored files do not contain live NVIDIA or Supabase secret keys.
 - Credentials shared during development should be rotated before deployment.
 - Pinned the optional Rolldown WASM peer packages used by Vite so Linux and Windows resolve the same clean-install graph and Render can use reproducible `npm ci` builds.
+- Made Render clean installs include development/build dependencies even under `NODE_ENV=production`, ensuring Vite is available during the build without moving build tooling into runtime dependencies.
 
 ## Database migrations
 

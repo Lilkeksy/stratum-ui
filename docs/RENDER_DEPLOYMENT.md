@@ -12,6 +12,14 @@ Stratum is configured as one Render web service. The production Express process 
 
 Render supplies `PORT` automatically. Do not add `PORT` or `API_PORT` in the Render dashboard.
 
+The build command is:
+
+```text
+npm ci --include=dev && npm run build
+```
+
+Vite and its React plugin are build-time development dependencies. The explicit `--include=dev` is required when `NODE_ENV=production`; the repository's `.npmrc` applies the same rule for manually configured Render services.
+
 ## Required environment variables
 
 | Variable | Render value |
