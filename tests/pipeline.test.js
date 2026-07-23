@@ -6,6 +6,7 @@ process.env.SUPABASE_PUBLISHABLE_KEY ||= 'test-publishable-key'
 process.env.SUPABASE_SECRET_KEY ||= 'test-secret-key'
 
 const { hasVerifiedMfa, tokenAssuranceLevel } = await import('../server/auth/session.js')
+const { isTrustedRequestOrigin } = await import('../server/security/requestOrigin.js')
 const { createEvidenceChunks, languageInstructions, responseStyleInstructions } = await import('../server/services/nvidiaService.js')
 const { translatableSummaryReferences } = await import('../server/services/translationService.js')
 
@@ -24,6 +25,34 @@ test('requires a verified MFA factor', () => {
   assert.equal(hasVerifiedMfa({ factors: [{ status: 'unverified' }] }), false)
   assert.equal(hasVerifiedMfa({ factors: [{ status: 'verified', factor_type: 'totp' }] }), true)
   assert.equal(hasVerifiedMfa({}), false)
+})
+
+test('trusts the origin currently serving the application', () => {
+  assert.equal(isTrustedRequestOrigin({
+    origin: 'https://stratum-example.onrender.com',
+    protocol: 'https',
+    host: 'stratum-example.onrender.com',
+  }), true)
+})
+
+test('normalizes configured origins and rejects cross-site requests', () => {
+  const request = {
+    protocol: 'https',
+    host: 'stratum-example.onrender.com',
+    configuredOrigins: ['https://stratum.example.com/'],
+  }
+  assert.equal(isTrustedRequestOrigin({
+    ...request,
+    origin: 'https://stratum.example.com',
+  }), true)
+  assert.equal(isTrustedRequestOrigin({
+    ...request,
+    origin: 'https://malicious.example',
+  }), false)
+  assert.equal(isTrustedRequestOrigin({
+    ...request,
+    origin: 'not a valid origin',
+  }), false)
 })
 
 test('creates stable unique evidence IDs across semantic chunks', () => {

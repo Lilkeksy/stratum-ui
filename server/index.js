@@ -9,6 +9,7 @@ import { env } from './config/env.js'
 import authRoutes from './routes/auth.js'
 import policyRoutes from './routes/policies.js'
 import preferenceRoutes from './routes/preferences.js'
+import { isTrustedRequestOrigin } from './security/requestOrigin.js'
 import { recoverPendingPolicyDocuments, startPolicyProcessor } from './services/policyProcessor.js'
 import { getAiConfiguration } from './services/nvidiaService.js'
 
@@ -29,7 +30,12 @@ app.use(cookieParser())
 app.use('/api', (request, response, next) => {
   if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return next()
   const origin = request.get('origin')
-  if (origin && !env.appOrigins.includes(origin)) {
+  if (!isTrustedRequestOrigin({
+    origin,
+    protocol: request.protocol,
+    host: request.get('host'),
+    configuredOrigins: env.appOrigins,
+  })) {
     return response.status(403).json({ error: 'Untrusted request origin' })
   }
   next()
