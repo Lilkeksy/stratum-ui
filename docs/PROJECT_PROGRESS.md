@@ -120,6 +120,7 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 - Added origin validation, Helmet headers, request size limits, upload validation, and route-level authentication.
 - Verified that tracked and unignored files do not contain live NVIDIA or Supabase secret keys.
 - Credentials shared during development should be rotated before deployment.
+- Pinned the optional Rolldown WASM peer packages used by Vite so Linux and Windows resolve the same clean-install graph and Render can use reproducible `npm ci` builds.
 
 ## Database migrations
 
@@ -176,6 +177,7 @@ Latest local checks on 2026-07-23:
 - The redesigned authentication and uploaded-policy comparison passed locale validation, lint, the production build, all five regression tests, and a zero-vulnerability dependency audit; the local UI returned HTTP 200.
 - The Demo, email-only authentication, typography, and Render production path passed locale validation, lint, the production build, all five regression tests, server syntax checks, and a live production-process probe returning HTTP 200 for the React root and ok for /api/health.
 - The real-data Dashboard integration passed localization coverage for 214 literal calls, lint, the production build, and all five regression tests.
+- The Render lockfile repair passed an `npm ci --dry-run` synchronization check, lint, the production build, all five regression tests, and a zero-vulnerability audit.
 - Backend JavaScript syntax checks passed.
 - Evidence chunking produced stable, unique evidence IDs across multiple chunks.
 - Local environment resolves Nano as the fast model and Super as the reasoning model.
