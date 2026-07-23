@@ -316,7 +316,10 @@ function App() {
           {currentView === "home" && (
             <Dashboard
               user={user}
+              refreshKey={uploadRefreshKey}
               onLoginClick={() => openAuth("login")}
+              onUploadClick={handleUploadClick}
+              onOpenLibrary={() => setCurrentView("compare")}
             />
           )}
           {currentView === "compare" && <PolicyLibrary user={user} refreshKey={uploadRefreshKey} />}

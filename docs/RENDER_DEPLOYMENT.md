@@ -40,7 +40,8 @@ Keep localhost redirect entries only for local development.
 
 ## Local files
 
-- `.env.local` contains local secret values and is intentionally ignored by Git.
+- `.env.local` contains local development secret values and is intentionally ignored by Git.
+- `.env.render` is a populated production-format environment file for bulk-copying into Render. It is also ignored by Git and must never be committed.
 - `.env.example` is the safe copyable template and contains placeholders only.
 - `render.yaml` is the deployment blueprint and contains no credentials.
 

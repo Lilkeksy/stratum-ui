@@ -52,6 +52,7 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 - Added a deliberate serif display and sans-serif interface typography hierarchy across page headings, navigation, controls, metadata, and body copy.
 - Added a Render Blueprint and deployment guide, made the Express server honor Render's `PORT`, bind to `0.0.0.0`, serve the built React application, and keep the UI/API on one production origin.
 - Updated the dashboard with user profile and account statistics.
+- Rebuilt Dashboard around real policy data: live totals, processing state, completed reviews, high-risk counts, recent uploads, risk distribution, account context, and direct upload/library actions.
 - Removed the redundant New Summary action, Data Analytics item, and Delete Account action.
 
 ### Authentication and sessions
@@ -168,12 +169,13 @@ Latest local checks on 2026-07-23:
 
 - `npm run lint` passed.
 - `npm run build` passed.
-- `npm run check:locales` confirmed all 203 literal translation calls remain cataloged after the responsive and icon cleanup.
+- `npm run check:locales` confirmed all 214 literal translation calls remain cataloged after the responsive and icon cleanup.
 - `npm audit --audit-level=high` reported zero vulnerabilities.
 - The automated regression suite passed all five tests.
 - The local Vite UI returned HTTP 200 after the final responsive production build.
 - The redesigned authentication and uploaded-policy comparison passed locale validation, lint, the production build, all five regression tests, and a zero-vulnerability dependency audit; the local UI returned HTTP 200.
 - The Demo, email-only authentication, typography, and Render production path passed locale validation, lint, the production build, all five regression tests, server syntax checks, and a live production-process probe returning HTTP 200 for the React root and ok for /api/health.
+- The real-data Dashboard integration passed localization coverage for 214 literal calls, lint, the production build, and all five regression tests.
 - Backend JavaScript syntax checks passed.
 - Evidence chunking produced stable, unique evidence IDs across multiple chunks.
 - Local environment resolves Nano as the fast model and Super as the reasoning model.
@@ -187,7 +189,7 @@ Latest local checks on 2026-07-23:
 - The final MFA and preference frontend production build passed.
 - The automated regression suite passed five tests covering JWT AAL parsing, verified MFA factors, evidence IDs, response-style prompts, and evidence-safe language translation.
 - The API health response confirms NVIDIA translation mode is configured, and the production frontend build with full-interface language switching passed.
-- Locale validation confirms all 203 literal translation calls are registered and all six non-English catalogs contain safe values.
+- Locale validation confirms all 214 literal translation calls are registered and all six non-English catalogs contain safe values.
 - The public-first guest entry flow passed locale validation, lint, the production build, and all five regression tests; the local UI and API health endpoints remained available.
 
 Earlier NVIDIA hosted-trial checks confirmed the API key and model availability, but Gemma inference requests timed out. This is why Gemma is currently a challenger rather than the production default. Hosted trial latency must not be treated as production capacity.
