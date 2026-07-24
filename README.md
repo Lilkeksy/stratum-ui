@@ -98,8 +98,8 @@ Signed-out visitors are not sent directly to authentication. A new visitor choos
 
 Set `APP_PUBLIC_URL` to the public HTTPS URL where Stratum is deployed. In Supabase, open **Authentication > URL Configuration**, set the Site URL to the same deployed origin, and allow these exact redirect URLs:
 
-- `https://your-domain.example/?auth_action=confirmed`
-- `https://your-domain.example/?auth_action=recovery`
+- `https://stratum-vdjt.onrender.com/?auth_action=confirmed`
+- `https://stratum-vdjt.onrender.com/?auth_action=recovery`
 
 Keep `http://127.0.0.1:5173/**` as an additional redirect only for same-computer local testing. A localhost link cannot work when opened on another device.
 

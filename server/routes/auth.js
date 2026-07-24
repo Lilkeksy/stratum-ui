@@ -6,6 +6,7 @@ import { hydrateAuthClient, prepareMfa, verifyMfa } from '../auth/mfa.js'
 import { publicUser, resolveSession } from '../auth/session.js'
 import { env } from '../config/env.js'
 import { createSupabaseAuthClient } from '../lib/supabase.js'
+import { resolvePublicRequestOrigin } from '../security/requestOrigin.js'
 
 const router = Router()
 
@@ -33,6 +34,14 @@ const mfaVerifyLimiter = rateLimit({
   legacyHeaders: false,
   message: { error: 'Too many verification attempts. Wait before trying again.' },
 })
+
+function authRedirectUrl(request, action) {
+  const origin = resolvePublicRequestOrigin({
+    origin: request.get('origin'),
+    fallbackOrigin: env.publicAppUrl,
+  })
+  return `${origin}/?auth_action=${action}`
+}
 
 function credentials(body) {
   return body.contactMethod === 'phone'
@@ -67,7 +76,7 @@ router.post('/signup', async (request, response, next) => {
     const supabase = createSupabaseAuthClient()
     const signupOptions = { data: { full_name: body.name } }
     if (body.contactMethod === 'email') {
-      signupOptions.emailRedirectTo = env.publicAppUrl + '/?auth_action=confirmed'
+      signupOptions.emailRedirectTo = authRedirectUrl(request, 'confirmed')
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -153,7 +162,7 @@ router.post('/password/forgot', async (request, response, next) => {
     const { email } = emailSchema.parse(request.body)
     const supabase = createSupabaseAuthClient()
     const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase(), {
-      redirectTo: env.publicAppUrl + '/?auth_action=recovery',
+      redirectTo: authRedirectUrl(request, 'recovery'),
     })
 
     if (isEmailRateLimitError(error)) return sendAuthError(response, error, 429)

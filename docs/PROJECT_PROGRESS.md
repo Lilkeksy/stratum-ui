@@ -123,6 +123,8 @@ The React frontend, Supabase authentication, document upload and extraction pipe
 - Pinned the optional Rolldown WASM peer packages used by Vite so Linux and Windows resolve the same clean-install graph and Render can use reproducible `npm ci` builds.
 - Made Render clean installs include development/build dependencies even under `NODE_ENV=production`, ensuring Vite is available during the build without moving build tooling into runtime dependencies.
 - Made request-origin protection automatically recognize the HTTPS host currently serving Stratum, while retaining `APP_ORIGIN` for explicitly allowed additional domains and continuing to reject cross-site requests.
+- Made signup confirmation and password-recovery emails derive their redirect from the validated deployed browser origin, pinned the current Render URL in the Blueprint, and documented the exact Supabase allow-list entries.
+- Reworked the Stratum brand mark as a transparent, compact SVG stack with no blue tile or artificial shadow.
 
 ## Database migrations
 

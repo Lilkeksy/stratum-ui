@@ -6,7 +6,7 @@ process.env.SUPABASE_PUBLISHABLE_KEY ||= 'test-publishable-key'
 process.env.SUPABASE_SECRET_KEY ||= 'test-secret-key'
 
 const { hasVerifiedMfa, tokenAssuranceLevel } = await import('../server/auth/session.js')
-const { isTrustedRequestOrigin } = await import('../server/security/requestOrigin.js')
+const { isTrustedRequestOrigin, resolvePublicRequestOrigin } = await import('../server/security/requestOrigin.js')
 const { createEvidenceChunks, languageInstructions, responseStyleInstructions } = await import('../server/services/nvidiaService.js')
 const { translatableSummaryReferences } = await import('../server/services/translationService.js')
 
@@ -25,6 +25,16 @@ test('requires a verified MFA factor', () => {
   assert.equal(hasVerifiedMfa({ factors: [{ status: 'unverified' }] }), false)
   assert.equal(hasVerifiedMfa({ factors: [{ status: 'verified', factor_type: 'totp' }] }), true)
   assert.equal(hasVerifiedMfa({}), false)
+})
+
+test('uses the deployed browser origin for authentication email redirects', () => {
+  assert.equal(resolvePublicRequestOrigin({
+    origin: 'https://stratum-vdjt.onrender.com',
+    fallbackOrigin: 'http://127.0.0.1:5173',
+  }), 'https://stratum-vdjt.onrender.com')
+  assert.equal(resolvePublicRequestOrigin({
+    fallbackOrigin: 'http://127.0.0.1:5173/',
+  }), 'http://127.0.0.1:5173')
 })
 
 test('trusts the origin currently serving the application', () => {

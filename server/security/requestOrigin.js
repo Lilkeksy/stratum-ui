@@ -8,6 +8,10 @@ function normalizeOrigin(value) {
   }
 }
 
+export function resolvePublicRequestOrigin({ origin, fallbackOrigin }) {
+  return normalizeOrigin(origin) || normalizeOrigin(fallbackOrigin)
+}
+
 export function isTrustedRequestOrigin({
   origin,
   protocol,

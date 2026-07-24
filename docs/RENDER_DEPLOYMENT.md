@@ -7,8 +7,8 @@ Stratum is configured as one Render web service. The production Express process 
 1. Push this repository to GitHub.
 2. In Render, choose **New > Blueprint** and connect the repository.
 3. Render reads `render.yaml` and asks for every environment value marked `sync: false`.
-4. After Render assigns the service URL, set both `APP_PUBLIC_URL` and `APP_ORIGIN` to that exact HTTPS origin, without a trailing slash. Example: `https://stratum.onrender.com`.
-5. Deploy again after those URL values are saved.
+4. The Blueprint currently sets both `APP_PUBLIC_URL` and `APP_ORIGIN` to `https://stratum-vdjt.onrender.com`.
+5. If the service URL or custom domain changes, update both values to that exact HTTPS origin without a trailing slash, then deploy again.
 
 Render supplies `PORT` automatically. Do not add `PORT` or `API_PORT` in the Render dashboard.
 
@@ -25,8 +25,8 @@ Vite and its React plugin are build-time development dependencies. The explicit 
 | Variable | Render value |
 | --- | --- |
 | `NODE_ENV` | `production` |
-| `APP_PUBLIC_URL` | The exact public Render HTTPS origin |
-| `APP_ORIGIN` | The same public Render HTTPS origin |
+| `APP_PUBLIC_URL` | `https://stratum-vdjt.onrender.com` |
+| `APP_ORIGIN` | `https://stratum-vdjt.onrender.com` |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key |
 | `SUPABASE_SECRET_KEY` | Supabase server secret key |
@@ -40,9 +40,9 @@ Never place `SUPABASE_SECRET_KEY`, `NVIDIA_NIM_API_KEY`, or `GOOGLE_TRANSLATE_AP
 
 In Supabase **Authentication > URL Configuration**:
 
-- Set the Site URL to the Render HTTPS origin.
-- Add `https://your-render-domain/?auth_action=confirmed`.
-- Add `https://your-render-domain/?auth_action=recovery`.
+- Set the Site URL to `https://stratum-vdjt.onrender.com/`.
+- Add `https://stratum-vdjt.onrender.com/?auth_action=confirmed`.
+- Add `https://stratum-vdjt.onrender.com/?auth_action=recovery`.
 
 Keep localhost redirect entries only for local development.
 

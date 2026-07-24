@@ -11,9 +11,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: APP_PUBLIC_URL
-        sync: false
+        value: https://stratum-vdjt.onrender.com
       - key: APP_ORIGIN
-        sync: false
+        value: https://stratum-vdjt.onrender.com
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_PUBLISHABLE_KEY
